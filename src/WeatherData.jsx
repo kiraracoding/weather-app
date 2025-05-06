@@ -1,16 +1,33 @@
+import React, { useState, useEffect } from 'react';
+
 
 function WeatherData() {
 
+    const url= 'https://api.openweathermap.org/data/2.5/weather?q=London,uk&APPID=ce8f36acb900d60d35e576d797509456'
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+        })
+        .catch(error => console.error('Error:', error));
 
     return (
         <>
         <div className="w-full flex flex-row justify-between items-center p4">
             <div className="flex space-x-10 pl-5 pt-5">
-                <input type='text' className="border-4 black-border w-[500px]"/>
-                <button>SEARCH</button>
+                <input 
+                    type='text' 
+                    className="border-4 black-border w-[500px]"
+                    placeholder="Enter city name"
+                />
+                <button className='p-2 border'>SEARCH</button>
             </div>
-            <button className="mt-5 mr-5">FAHRENHEIT</button>
-        </div>
+
+            <button className="mt-5 p-2 border"> FAHRENHEIT
+            </button>
+            </div>
+        
         <div className="flex flex-col w-full h-[400px] items-center justify-around">
             <h4>LOCATION</h4>
             <p>WEEKDAY  00 : 00 PM</p>
@@ -19,6 +36,8 @@ function WeatherData() {
             <h3>DEGREES</h3>
             <p>FEELS LIKE</p>
         </div>
+
+
         <div className="flex flex-col justify-between h-[400px]">
             <div className="w-full flex flex-row justify-between">
                 <div className="pl-5">
