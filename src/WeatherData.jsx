@@ -7,6 +7,7 @@ function WeatherData() {
     const [city, setCity] = useState("");
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [unit, setUnit] = useState('metric');
 
     const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
@@ -15,8 +16,8 @@ function WeatherData() {
         setError(null);
         
         const url = cityName
-        ? `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${API_KEY}`
-        : `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=${API_KEY}`;
+        ? `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${API_KEY}&units=${unit}`
+        : `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=${API_KEY}&units=${unit}`;
 
         axios.get(url)
         .then(response => {
@@ -67,6 +68,34 @@ function WeatherData() {
         }
     };
 
+    const formatLocalDateTime = (timestamp, timezoneOffset) => {
+        const localTime = new Date((timestamp + timezoneOffset)*1000);
+        const options = {
+            weekday: 'long',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        };
+        return localTime.toLocaleString('en-US', options);
+    };
+
+    const formatLocalTime = (timestamp, timezoneOffset) => {
+        const localTime = new Date((timestamp + timezoneOffset)*1000);
+        const options = {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        };
+        return localTime.toLocaleString('en-US', options);
+    };
+
+    const toggleUnit = () => {
+        setUnit(prev => (prev === 'metric' ? 'imperial' : 'metric'));
+    };
+
+    const cToF = (celsius) => (celsius * 9/5 + 32).toFixed(1);
+
+
     return (
         <>
         <div className="w-full flex flex-row justify-between items-center p4">
@@ -81,41 +110,61 @@ function WeatherData() {
                 <button className='p-2 border' onClick={handleSearch}>SEARCH</button>
             </div>
 
-            <button className="mt-5 p-2 border"> FAHRENHEIT
+            <button className="mt-5 p-2 border" onClick={toggleUnit}> {unit === 'metric' ? 'FAHRENHEIT' : 'CELCIUS'}
             </button>
             </div>
         
         <div className="flex flex-col w-full h-[400px] items-center justify-around">
-            <h4>LOCATION</h4>
-            <p>WEEKDAY  00 : 00 PM</p>
+            <h4 className='uppercase'>{weatherData?.name}</h4>
+            <p className='uppercase'>{weatherData ? formatLocalDateTime(weatherData.dt, weatherData.timezone) : ''}</p>
             <img src='#'/>
-            <h1>WEATHER REPORT</h1>
-            <h3>DEGREES</h3>
-            <p>FEELS LIKE</p>
+            <h1 className='uppercase'>{weatherData?.weather[0].main}</h1>
+            <h3>{weatherData ? 
+                (unit === 'metric' 
+                    ? weatherData.main.temp.toFixed(1) + " °C" 
+                    : cToF(weatherData.main.temp) + " °F") 
+                  : ''}
+            </h3>
+            <p>{weatherData ? 
+                (unit === 'metric' 
+                    ? weatherData.main.feels_like.toFixed(1) + " °C" 
+                    : cToF(weatherData.main.feels_like) + " °F") 
+                : ''}
+            </p>
         </div>
 
 
         <div className="flex flex-col justify-between h-[400px]">
             <div className="w-full flex flex-row justify-between">
                 <div className="pl-5">
-                    <p>SUNRISE: 00:00 AM/PM</p>
-                    <p>SUNSET: 00:00 AM/PM</p>
+                    <p>SUNRISE: {weatherData? formatLocalTime(weatherData.sys.sunrise, weatherData.timezone) : ''}</p>
+                    <p>SUNSET: {weatherData? formatLocalTime(weatherData.sys.sunset, weatherData.timezone) : ''}</p>
                     <img src='#'/>
                 </div>
                 <div className="pr-5">
-                    <p>MIN: 00 C</p>
-                    <p>MAX: 00 C</p>
+                    <p>MIN: {weatherData ?
+                         (unit === 'metric' 
+                            ? weatherData.main.temp_min.toFixed(1) + " °C" 
+                            : cToF(weatherData.main.temp_min) + " °F") 
+                          : ''}
+                     </p>
+                    <p>MAX: {weatherData ?
+                        (unit === 'metric' 
+                            ? weatherData.main.temp_max.toFixed(1) + " °C" 
+                            : cToF(weatherData.main.temp_max) + " °F") 
+                        : ''}
+                     </p>
                     <img src='#'/>
                 </div>
             </div>
             <div className="flex flex-row w-full justify-between">
                 <div className="pl-5">
-                    <p>HUMIDITY: 0%</p>
-                    <p>WIND SPEED: 00.M/S</p>
+                    <p>HUMIDITY: {weatherData?.main.humidity}%</p>
+                    <p>WIND SPEED: {(weatherData?.wind.speed * 3.6).toFixed(1)} km/h</p>
                 </div>
                 <div className="pr-5">
-                    <p>PRESSURE: 0000 HPA</p>
-                    <p>CLOUDINESS: 0%</p>
+                    <p>PRESSURE: {weatherData?.main.pressure} HPA</p>
+                    <p>CLOUDINESS: {weatherData?.clouds.all}%</p>
                 </div>
             </div>
         </div>
