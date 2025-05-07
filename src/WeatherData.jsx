@@ -1,16 +1,71 @@
 import React, { useState, useEffect } from 'react';
-
+import axios from 'axios';
 
 function WeatherData() {
 
-    const url= 'https://api.openweathermap.org/data/2.5/weather?q=London,uk&APPID=ce8f36acb900d60d35e576d797509456'
+    const [weatherData, setWeatherData] = useState(null);
+    const [city, setCity] = useState("");
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-        })
-        .catch(error => console.error('Error:', error));
+    const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
+
+    const fetchWeather = (lat, lon, cityName = "") => {        
+        setLoading(true);
+        setError(null);
+        
+        const url = cityName
+        ? `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${API_KEY}`
+        : `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=${API_KEY}`;
+
+        axios.get(url)
+        .then(response => {
+            setWeatherData(response.data);
+            setLoading(false);
+
+            if (cityName) {
+                console.log("Weather data from searched city:", response.data);
+            } else {
+                console.log("Weather data from user location (lat/lon):", response.data);
+            }
+    })
+        .catch(error => {
+        setError('Failed to fetch weather data. Please try again');
+        setLoading(false);
+        });
+    };
+
+    useEffect (() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const { latitude, longitude } = position.coords;
+                    fetchWeather(latitude, longitude);
+                },
+                error => {
+                    console.error("Geolocation error:", error);
+                    setError("Unable to retrieve your location");
+                    setLoading(false);
+                }
+            );
+        } else {
+            console.error("Geolocation is not supported.");
+            setError("Geolocation us not supported by your browser");
+            setLoading(false);
+        }
+    }, []);
+
+    const handleCityChange = (e) => {
+        setCity(e.target.value);
+    };
+
+    const handleSearch = () => {
+        if (city) {
+            fetchWeather(null, null, city);
+        } else {
+            setError("Please enter a city name");
+        }
+    };
 
     return (
         <>
@@ -20,8 +75,10 @@ function WeatherData() {
                     type='text' 
                     className="border-4 black-border w-[500px]"
                     placeholder="Enter city name"
+                    value={city}
+                    onChange={handleCityChange}
                 />
-                <button className='p-2 border'>SEARCH</button>
+                <button className='p-2 border' onClick={handleSearch}>SEARCH</button>
             </div>
 
             <button className="mt-5 p-2 border"> FAHRENHEIT
