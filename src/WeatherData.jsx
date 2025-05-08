@@ -10,7 +10,7 @@ import sunImg from './assets/sun.png';
 import sunriseImg from './assets/sunrise.png';
 import thermometerImg from './assets/thermometer.png';
 import thunderstormImg from './assets/thunderstorm.png';
-
+import weatherAppBg from './assets/weatherapp-bg.jpg';
 
 function WeatherData() {
 
@@ -169,11 +169,11 @@ function WeatherData() {
 
     return (
         <>
-        <div className="w-full flex flex-row justify-between items-center p4">
-            <div className="flex space-x-10 pl-5 pt-5">
+        <div className="w-full flex flex-row justify-between items-center">
+            <div className="flex space-x-10 pt-5">
                 <input 
                     type='text' 
-                    className="border-4 black-border w-[500px]"
+                    className="border-3 black-border w-[400px] jersey-10-regular text-2xl tracking-wide pl-4 mr-2 rounded-full bg-white"
                     placeholder="Enter city or country name"
                     value={city}
                     onChange={handleCityChange}
@@ -183,65 +183,86 @@ function WeatherData() {
                         }  
                     }}
                 />
-                <button className='p-2 border' onClick={handleSearch}>SEARCH</button>
+                <button className='p-1 pl-6 pr-6 rounded-full border-3 jersey-10-regular text-2xl bg-[#92F830] ' onClick={handleSearch}>SEARCH</button>
             </div>
 
-            <button className="mt-5 p-2 border" onClick={toggleUnit}> {unit === 'metric' ? 'FAHRENHEIT' : 'CELCIUS'}
+            <button className="mt-5 pl-6 pr-6 pt-1 pb-1 border rounded-full border-3 jersey-10-regular text-2xl bg-[#AF81E4]" onClick={toggleUnit}> {unit === 'metric' ? 'FAHRENHEIT' : 'CELCIUS'}
             </button>
-            </div>
+        </div>
         
-        <div className="flex flex-col w-full h-[400px] items-center justify-around">
-            <h4 className='uppercase'>{weatherData?.name}</h4>
-            <p> {weatherData ? formatLocalDateTime(weatherData.dt + Math.floor((Date.now()/1000) - weatherData.dt), weatherData.timezone) : ''}</p>
-            <img className='h-[150px]' src={iconSrc} alt={description}/>
-            <h1 className='uppercase'>{weatherData?.weather[0].description}</h1>
-            <h3>{weatherData ? 
-                (unit === 'metric' 
-                    ? weatherData.main.temp.toFixed(1) + " °C" 
-                    : cToF(weatherData.main.temp) + " °F") 
-                  : ''}
-            </h3>
-            <p>{weatherData ? 
-                (unit === 'metric' 
-                    ? weatherData.main.feels_like.toFixed(1) + " °C" 
-                    : cToF(weatherData.main.feels_like) + " °F") 
-                : ''}
-            </p>
+        <div className="flex flex-col w-full h-[450px] items-center justify-around">
+            <h4 className='uppercase jersey-10-regular text-9xl text-[#050761]'>{weatherData?.name}</h4>
+            <p className='-mt-15 text-5xl jersey-10-regular uppercase text-[#050761]'> 
+                {weatherData ? formatLocalDateTime(weatherData.dt + Math.floor((Date.now()/1000) - weatherData.dt), weatherData.timezone) : ''}</p>
+            
+            <div className='pb-10 flex flex-row w-full justify-around'>
+                <div className='w-[350px] flex flex-col items-end'>
+                    <img className='h-[180px] pr-15' src={iconSrc} alt={description}/>
+                </div>
+            
+                <div className='w-[350px] flex flex-col justify-center'>
+                    <h1 className='uppercase jersey-10-regular text-4xl text-[#0000FF]'>
+                        {weatherData?.weather[0].description}</h1>
+                    <h3 className='jersey-10-regular text-8xl text-[#0000FF]'>
+                        {weatherData ? 
+                        (unit === 'metric' 
+                            ? weatherData.main.temp.toFixed(1) + " °C" 
+                            : cToF(weatherData.main.temp) + " °F") 
+                        : ''}
+                    </h3>
+                    <p className='jersey-10-regular text-4xl text-[#0000FF]'>
+                        FEELS LIKE {weatherData ? 
+                        (unit === 'metric' 
+                            ? weatherData.main.feels_like.toFixed(1) + " °C" 
+                            : cToF(weatherData.main.feels_like) + " °F") 
+                        : ''}
+                    </p>
+                </div>
+            </div>
+   
         </div>
 
 
-        <div className="flex flex-col justify-between h-[400px]">
+        <div className="mb-10 flex flex-col justify-between h-[380px]">
             <div className="w-full flex flex-row justify-between">
-                <div className="pl-5">
-                    <p>SUNRISE: {weatherData? formatLocalTime(weatherData.sys.sunrise, weatherData.timezone) : ''}</p>
-                    <p>SUNSET: {weatherData? formatLocalTime(weatherData.sys.sunset, weatherData.timezone) : ''}</p>
-                    <img className='h-[60px]' src={sunriseImg}/>
+                <div className="h-[180px] w-[370px] pl-5 pt-20 bg-[#FABE47] flex flex-col justify-center border-t-2 border-l-2 border-r-6 border-b-6 rounded-2xl">
+                    <p className='jersey-10-regular text-4xl'> 
+                        &gt; SUNRISE: {weatherData? formatLocalTime(weatherData.sys.sunrise, weatherData.timezone) : ''}</p>
+                    <p className='jersey-10-regular text-4xl'>
+                        &gt; SUNSET: {weatherData? formatLocalTime(weatherData.sys.sunset, weatherData.timezone) : ''}</p>
+                    <img className='relative left-62 bottom-12 h-[80px] w-[80px]' src={sunriseImg}/>
                 </div>
-                <div className="pr-5">
-                    <p>MIN: {weatherData ?
+                <div className="h-[180px] w-[370px] pl-5 pt-20 bg-[#40FFE2] flex flex-col justify-center border-t-2 border-l-2 border-r-6 border-b-6 rounded-2xl">
+                    <p className='jersey-10-regular text-4xl'>
+                        &gt; MIN: {weatherData ?
                          (unit === 'metric' 
                             ? weatherData.main.temp_min.toFixed(1) + " °C" 
                             : cToF(weatherData.main.temp_min) + " °F") 
                           : ''}
                      </p>
-                    <p>MAX: {weatherData ?
+                    <p className='jersey-10-regular text-4xl'>
+                        &gt; MAX: {weatherData ?
                         (unit === 'metric' 
                             ? weatherData.main.temp_max.toFixed(1) + " °C" 
                             : cToF(weatherData.main.temp_max) + " °F") 
                         : ''}
                      </p>
-                    <img className='h-[60px]' src={thermometerImg}/>
+                    <img className='relative left-65 bottom-12 h-[80px] w-[80px]' src={thermometerImg}/>
                 </div>
             </div>
-            <div className="flex flex-row w-full justify-between">
-                <div className="pl-5">
-                    <p>HUMIDITY: {weatherData?.main.humidity}%</p>
-                    <p>WIND SPEED: {(weatherData?.wind.speed * 3.6).toFixed(1)} km/h</p>
+            <div className="h-[180px] w-[370px] bg-[#FF5BC3] border-t-2 border-l-2 border-r-6 border-b-6 rounded-2xl flex flex-row w-full justify-between">
+                <div className="pl-5 w-[360px] flex flex-col justify-center">
+                    <p className='jersey-10-regular text-4xl'>
+                        &gt; HUMIDITY: {weatherData?.main.humidity}%</p>
+                    <p className='jersey-10-regular text-4xl'>
+                        &gt; WIND SPEED: {(weatherData?.wind.speed * 3.6).toFixed(1)} km/h</p>
                 </div>
-                <div className="pr-5">
-                    <p>PRESSURE: {weatherData?.main.pressure} HPA</p>
-                    <p>CLOUDINESS: {weatherData?.clouds.all}%</p>
-                    <img className='h-[60px]' src={rainbowImg}></img>
+                <div className="w-[360px] flex flex-col justify-center">
+                    <p className='jersey-10-regular text-4xl pt-20'>
+                        &gt; PRESSURE: {weatherData?.main.pressure} HPA</p>
+                    <p className='jersey-10-regular text-4xl'>
+                        &gt; CLOUDINESS: {weatherData?.clouds.all}%</p>
+                    <img className='relative bottom-12 left-65 h-[80px] w-[80px]' src={rainbowImg}></img>
                 </div>
             </div>
         </div>
