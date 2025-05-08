@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import cloudImg from './assets/cloud.png';
+import fallbackImg from './assets/fallback.png';
+import fireImg from './assets/fire.png';
+import rainImg from './assets/rain.png';
+import rainbowImg from './assets/rainbow.png';
+import snowImg from './assets/snow.png';
+import sunImg from './assets/sun.png';
+import sunriseImg from './assets/sunrise.png';
+import thermometerImg from './assets/thermometer.png';
+import thunderstormImg from './assets/thunderstorm.png';
+
 
 function WeatherData() {
 
@@ -8,6 +19,7 @@ function WeatherData() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [unit, setUnit] = useState('metric');
+    const [currentTime, setCurrentTime] = useState(Date.now());
 
     const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
@@ -69,24 +81,36 @@ function WeatherData() {
     };
 
     const formatLocalDateTime = (timestamp, timezoneOffset) => {
-        const localTime = new Date((timestamp + timezoneOffset)*1000);
+        const date = new Date(timestamp * 1000);
         const options = {
             weekday: 'long',
             hour: '2-digit',
             minute: '2-digit',
             hour12: true,
+            timeZone: 'UTC',
         };
-        return localTime.toLocaleString('en-US', options);
+        const shiftedDate = new Date(date.getTime() + timezoneOffset * 1000);
+        return shiftedDate.toLocaleString('en-US', options);
     };
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(Date.now());
+        }, 60 * 1000); 
+    
+        return () => clearInterval(interval); 
+    }, []);
+
     const formatLocalTime = (timestamp, timezoneOffset) => {
-        const localTime = new Date((timestamp + timezoneOffset)*1000);
+        const date = new Date(timestamp * 1000);
         const options = {
             hour: '2-digit',
             minute: '2-digit',
             hour12: true,
+            timeZone: 'UTC',
         };
-        return localTime.toLocaleString('en-US', options);
+        const shiftedDate = new Date(date.getTime() + timezoneOffset * 1000);
+        return shiftedDate.toLocaleString('en-US', options);
     };
 
     const toggleUnit = () => {
@@ -95,6 +119,53 @@ function WeatherData() {
 
     const cToF = (celsius) => (celsius * 9/5 + 32).toFixed(1);
 
+    const weatherIconMap = {
+        "clear sky": sunImg,
+        "few clouds": cloudImg,
+        "scattered clouds": cloudImg,
+        "broken clouds": cloudImg,
+        "overcast clouds": cloudImg,
+
+        "light rain": rainImg,
+        "moderate rain": rainImg,
+        "heavy intensity rain": rainImg,
+        "very heavy rain": rainImg,
+        "extreme rain": rainImg,
+        "freezing rain": rainImg,
+        "light intensity shower rain": rainImg,
+        "shower rain": rainImg,
+        "heavy intensity shower rain": rainImg,
+        "ragged shower rain": rainImg,
+        "light drizzle": rainImg,
+        "drizzle": rainImg,
+        "heavy intensity drizzle": rainImg,
+
+        "thunderstorm": thunderstormImg,
+        "thunderstorm with light rain": thunderstormImg,
+        "thunderstorm with heavy rain": thunderstormImg,
+        "thunderstorm with drizzle": thunderstormImg,
+
+        "light snow": snowImg,
+        "snow": snowImg,
+        "heavy snow": snowImg,
+        "sleet": snowImg,
+        "light shower snow": snowImg,
+        "shower snow": snowImg,
+        "heavy shower snow": snowImg,
+
+        "mist": fireImg,
+        "smoke": fireImg,
+        "haze": fireImg,
+        "fog": fireImg,
+        "sand": fireImg, 
+        "dust": fireImg,
+        "ash": fireImg,
+        "squalls": fireImg,
+        "tornado": fireImg,
+    };
+
+    const description = weatherData?.weather?.[0]?.description || '';
+    const iconSrc = weatherIconMap[description.toLowerCase()] || fallbackImg;
 
     return (
         <>
@@ -103,9 +174,14 @@ function WeatherData() {
                 <input 
                     type='text' 
                     className="border-4 black-border w-[500px]"
-                    placeholder="Enter city name"
+                    placeholder="Enter city or country name"
                     value={city}
                     onChange={handleCityChange}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleSearch();
+                        }  
+                    }}
                 />
                 <button className='p-2 border' onClick={handleSearch}>SEARCH</button>
             </div>
@@ -116,9 +192,9 @@ function WeatherData() {
         
         <div className="flex flex-col w-full h-[400px] items-center justify-around">
             <h4 className='uppercase'>{weatherData?.name}</h4>
-            <p className='uppercase'>{weatherData ? formatLocalDateTime(weatherData.dt, weatherData.timezone) : ''}</p>
-            <img src='#'/>
-            <h1 className='uppercase'>{weatherData?.weather[0].main}</h1>
+            <p> {weatherData ? formatLocalDateTime(weatherData.dt + Math.floor((Date.now()/1000) - weatherData.dt), weatherData.timezone) : ''}</p>
+            <img className='h-[150px]' src={iconSrc} alt={description}/>
+            <h1 className='uppercase'>{weatherData?.weather[0].description}</h1>
             <h3>{weatherData ? 
                 (unit === 'metric' 
                     ? weatherData.main.temp.toFixed(1) + " °C" 
@@ -139,7 +215,7 @@ function WeatherData() {
                 <div className="pl-5">
                     <p>SUNRISE: {weatherData? formatLocalTime(weatherData.sys.sunrise, weatherData.timezone) : ''}</p>
                     <p>SUNSET: {weatherData? formatLocalTime(weatherData.sys.sunset, weatherData.timezone) : ''}</p>
-                    <img src='#'/>
+                    <img className='h-[60px]' src={sunriseImg}/>
                 </div>
                 <div className="pr-5">
                     <p>MIN: {weatherData ?
@@ -154,7 +230,7 @@ function WeatherData() {
                             : cToF(weatherData.main.temp_max) + " °F") 
                         : ''}
                      </p>
-                    <img src='#'/>
+                    <img className='h-[60px]' src={thermometerImg}/>
                 </div>
             </div>
             <div className="flex flex-row w-full justify-between">
@@ -165,6 +241,7 @@ function WeatherData() {
                 <div className="pr-5">
                     <p>PRESSURE: {weatherData?.main.pressure} HPA</p>
                     <p>CLOUDINESS: {weatherData?.clouds.all}%</p>
+                    <img className='h-[60px]' src={rainbowImg}></img>
                 </div>
             </div>
         </div>
